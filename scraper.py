@@ -192,8 +192,8 @@ def computeWordFrequencies(tokens: list[str]) -> dict[str, int]:
         # If token is a stop word skip
         if checkStopWord(token):
             continue
-        # 
-        if len(token) <= 3:
+        # If 1 characters
+        if len(token) == 1:
             continue 
         # If seen increment token count
         if token in frequencies:
