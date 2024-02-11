@@ -1,6 +1,7 @@
 import re
 import frontier
-from urllib.parse import urlparse
+import urllib.robotparser
+from urllib.parse import urlparse, urlunparse
 from bs4 import BeautifulSoup
 
 def scraper(url, resp):
@@ -25,14 +26,14 @@ def extract_next_links(url, resp):
     
     # Verify response status is valid
     if not resp.status == 200:
-        # Placeholder for error checking
-        print(resp.status)
-        return url_list
-
-    # Check for permanent redirection
-    # If valid get new location from redirection
-    if(resp.status == 301):
+        # Check for permanent redirection
+        # If valid get new location from redirection
+        # Else return
+        if not resp.status == 301:
+            print(resp.status)
+            return url_list
         resp = resp.url
+
 
     # Check for traps
     for header, value in response.headers.items():
@@ -75,23 +76,8 @@ def extract_next_links(url, resp):
                 continue
 
             # Remove the fragment from end of link
-<<<<<<< HEAD
-            removeFragment(links)
-
-
-            temp_links.append(link)
-
-
-    # Verify that links point to websites within our domain
-    # using updated is_valid function
-=======
             parsed_link = removeFragment(parsed_link)
             temp_links.append(parsed_link)
-
-    # Check for traps
->>>>>>> ab89acec553b04eb66002dddc304b745f8306643
-    
-    # Check for duplicates
     
     # If link passes all tests, add it to the url_list
     for item in temp_links:
@@ -108,6 +94,19 @@ def extract_next_links(url, resp):
     *.stat.uci.edu/*
 '''
 
+def checkRobotTxt(url, user_agent = 'UW24 Bot'):
+    robot_parser = urllib.robotparser.RobotFileParser()
+    # Check domain for robots.txt
+    parsed_url = urlparse(url)
+    # Stripped of path, query and fragments
+    stripped_url = urlunparse((parsed_url.scheme, parsed_url.netloc, '', '', '', ''))
+    # Append /robots.txt and set the url to robot parser
+    robot_parser.set_url(stripped_url + '/robots.txt')
+    # Reads the robots.txt URL and feeds it to the parser.
+    robot_parser.read()
+
+    return robot_parser.can_fetch(user_agent, url)
+    
 
 def removeFragment(parsedUrl: urlparse) -> urlparse:
     newURL = parsedUrl._replace(fragment='')
@@ -146,6 +145,7 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]) and not checkValidUCIHost(parsed):
             return False
+        # Check robot.txt for permission
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
