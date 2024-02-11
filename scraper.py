@@ -198,7 +198,7 @@ def computeWordFrequencies(tokens: list[str]) -> dict[str, int]:
 def writeFiftyCommonWordsReport():
     tokens = tokenize("reports/HTMLReport.txt")
     frequencies = computeWordFrequencies(tokens)
-    with open("reports/commonWords.txt", "w") as commonWords:
+    with open("reports/commonWordsReport.txt", "w") as commonWords:
         for tokenKey in sorted(frequencies, key=lambda x: frequencies[x], reverse=True)[:50]:
             commonWords.write(f"{tokenKey} - {str(frequencies[tokenKey])}" + "\n")
     
