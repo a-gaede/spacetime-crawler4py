@@ -19,9 +19,9 @@ def count_words(text):
     tokens = re.findall(r'\b\w+\b', text)
     for token in tokens:
         if token.upper() not in word_counts:
-            words[token.upper()] = 1
-        else
-            words[token.upper()] += 1
+            word_counts[token.upper()] = 1
+        else:
+            word_counts[token.upper()] += 1
     return word_counts
         
 
