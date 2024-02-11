@@ -20,24 +20,19 @@ def extract_next_links(url, resp):
         if url == None or resp == None or resp.raw_response.content == None:
             return url_list
     except:
-        print(url)
+        pass
     
     # Verify response status is valid
-    if not resp.status == 200:
+    if not (resp.status == 200):
         # Check for permanent redirection
         # If valid get new location from redirection
         # Else return
-        if not resp.status == 301:
+        if not (resp.status == 301):
             print(resp.status)
             return url_list
-        resp = resp.url
+        redirectedUrl = resp.url
+        url = redirectedUrl
         
-    # Check permissions???
-    
-    # Check traps???
-    
-    # Check capcha???
-    
     # Convert text to usable format
     raw_text = resp.raw_response.text
     parsed_text = BeautifulSoup(raw_text,'html.parser')
