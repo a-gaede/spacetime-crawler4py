@@ -37,6 +37,10 @@ def extract_next_links(url, resp):
     raw_text = resp.raw_response.text
     parsed_text = BeautifulSoup(raw_text,'html.parser')
     
+    # Check large file
+    if checkLargeFile(resp.raw_response):
+        return url_list
+    
     # Check if low value page
     if checkLowInformation(parsed_text):
         return url_list
@@ -217,3 +221,12 @@ def checkLowInformation(parsed_text):
         return True
     else:
         return False
+    
+def checkLargeFile(rawResponse):
+    MAXSIZE = 10 * 1024 * 1024  # 10 MB threshold
+    contentLength = int(rawResponse.headers.get("Content-Length", 0))
+    
+    # Check if the file size exceeds the maximum size
+    if contentLength > MAXSIZE:
+        return True
+    return False
