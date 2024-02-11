@@ -33,6 +33,10 @@ def extract_next_links(url, resp):
             return url_list
         resp = resp.url
 
+    # Check for permission
+    if not checkRobotTxt(url):
+        return url_list
+
 
     # Check for traps
     for header, value in response.headers.items():
