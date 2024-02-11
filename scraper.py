@@ -1,104 +1,77 @@
 import re
-import frontier
+from stopWords import STOPWORDS
 from urllib.parse import urlparse, urlunparse
 from bs4 import BeautifulSoup
+
+UNIQUES = set()
+LONGEST = (0, "")
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
-    # Implementation required.
-    # url: the URL that was used to get the page
-    # resp.url: the actual url of the page
-    # resp.status: the status code returned by the server. 200 is OK, you got the page. Other numbers mean that there was some kind of problem.
-    # resp.error: when status is not 200, you can check the error here, if needed.
-    # resp.raw_response: this is where the page actually is. More specifically, the raw_response has two parts:
-    #         resp.raw_response.url: the url, again
-    #         resp.raw_response.content: the content of the page!
-    # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+    global UNIQUES, LONGEST
     url_list = list()
 
     # Check for empty sites
-    if url == None or resp == None or resp.raw_response.content == None:
-        return url_list
+    try:
+        if url == None or resp == None or resp.raw_response.content == None:
+            return url_list
+    except:
+        print(url)
     
     # Verify response status is valid
     if not resp.status == 200:
-        # Placeholder for error checking
-        print(resp.status)
-        return url_list
-
-    # Check for permanent redirection
-    # If valid get new location from redirection
-    if(resp.status == 301):
-        resp = resp.url
-
-    # Check for traps
-    for header, value in response.headers.items():
-        if(header.lower() in ['x-robots-tag', 'x-content-type-options']):
+        # Check for permanent redirection
+        # If valid get new location from redirection
+        # Else return
+        if not resp.status == 301:
+            print(resp.status)
             return url_list
+        resp = resp.url
+        
+    # Check permissions???
     
+    # Check traps???
+    
+    # Check capcha???
     
     # Convert text to usable format
     raw_text = resp.raw_response.text
-    
-    # Check for capcha
-    if 'CAPCHA' in raw_text or 'capcha' in raw_text:
-        return url_list
-
     parsed_text = BeautifulSoup(raw_text,'html.parser')
-
-    # Check unique pages
-    #   Unique pages function?
-    # Count words, check for longest document
-    #   Maybe add a function for this?
-    # Count 50 most common words w/o stop words
-    #   Word counter function
-    # Count subdomains
-
-    # Extract links from text
     
-    temp_links = list() # Holds unchecked links
-
+    # Check if low value page???
+    
+    # Add html text to file
+    writeHTMLData(parsed_text)
+    # Check if it is the new longest page
+    if len(parsed_text.get_text()) > LONGEST[0]:
+        LONGEST = (len(parsed_text.get_text()), url)
+    
+    # Extract links from text
     for item in parsed_text.find_all('a'):
-        links = item.get('href') # Returns a list of links
-        if is_valid(links):
+        link = item.get('href') # Returns a list of links
+        if is_valid(link):
             
             # Break down links into sections
-            parsed_link = urlparse(links)
+            parsed_link = urlparse(link)
 
             # Remove the fragment from end of link
             parsed_link = removeFragment(parsed_link)
-            # Add URL to list as a string
-            temp_links.append(urlunparse(parsed_link))
-
-
-    # Check for traps
-    
-    # Check for duplicates
-    
-    # If link passes all tests, add it to the url_list
-    for item in temp_links:
-            Frontier.add_url(item)
+        
+            # Add link
+            # Issue - same links appear but difference in scheme http vs https
+            UNIQUES.add(urlunparse(parsed_link))
+            url_list.append(urlunparse(parsed_link))
 
     return url_list
 
-## TODO:
-'''
-    List of valid domains:
-    *.ics.uci.edu/*
-    *.cs.uci.edu/*
-    *.informatics.uci.edu/*
-    *.stat.uci.edu/*
-'''
-
-
 def removeFragment(parsedUrl: urlparse) -> urlparse:
+    # Remove fragment
     newURL = parsedUrl._replace(fragment='')
     
     return newURL
-
 
 def checkValidUCIHost(parsedUrl: urlparse) -> bool:
     # Check if URL has a hostname
@@ -119,7 +92,7 @@ def checkValidUCIHost(parsedUrl: urlparse) -> bool:
     # Check if URL parts contain all the valid components
     if (urlDomain in VALIDS and urlSchool == "uci" and urlEnd == "edu"):
         return True
-        
+
     return False
         
 
@@ -146,3 +119,86 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+def getUniques():
+    return UNIQUES
+
+def writeUniquesReport():
+    # Create a file in "reports/uniquesReport.txt" with number of unique links and the links
+    with open('reports/uniquesReport.txt', 'w') as uniquesReport:
+        uniquesReport.write("Number of unique pages: " + str(len(UNIQUES)) + "\n")
+        for i in getUniques():
+            uniquesReport.write(i+"\n")
+            
+def writeLongestReport():
+    # Create a file in "reports/longestReport.txt" with link with most text and number of words
+    with open('reports/longestReport.txt', 'w') as longestReport:
+        words = LONGEST[0]
+        URL = LONGEST[1]
+        longestReport.write(f'{URL} - {words}')
+
+def clearHTMLData():
+    # Make file empty
+    with open('reports/HTMLReport.txt', 'w'):
+        pass
+            
+def writeHTMLData(htmlData):
+    # Add HTML text to file
+    with open('reports/HTMLReport.txt', 'a', encoding="utf-8") as HTMLReport:
+        HTMLReport.write(htmlData.get_text())
+
+def tokenize(TextFilePath: str) -> list[str]:
+    with open(TextFilePath, 'r', encoding='utf-8') as textFile:
+        tokens = []
+        char = textFile.read(1).lower()
+        token = ""
+        while char:
+            try:
+                # Check if an english alphabet character or number
+                if 97 <= ord(char) <= 122 or char.isnumeric():
+                    token += char
+                else:
+                    if token:
+                        tokens.append(token)
+                        token = ""
+
+                char = textFile.read(1).lower()
+            except Exception as e:
+                # If error occurs skip character and continue
+                tokens.append(token)
+                token = ""
+                char = textFile.read(1).lower()
+                continue
+
+        if token:
+            tokens.append(token)
+
+        return tokens
+
+def checkStopWord(token):
+    if token in STOPWORDS:
+        return True
+    return False
+
+def computeWordFrequencies(tokens: list[str]) -> dict[str, int]:
+    frequencies = {}
+    for token in tokens:
+        # If token is a stop word skip
+        if checkStopWord(token):
+            continue
+        # If seen increment token count
+        if token in frequencies:
+            frequencies[token] += 1
+        # Else add to frequencies dictionary
+        else:
+            frequencies[token] = 1
+
+    return frequencies
+
+def writeFiftyCommonWordsReport():
+    tokens = tokenize("reports/HTMLReport.txt")
+    frequencies = computeWordFrequencies(tokens)
+    with open("reports/commonWords.txt", "w") as commonWords:
+        for tokenKey in sorted(frequencies, key=lambda x: frequencies[x], reverse=True)[:50]:
+            commonWords.write(f"{tokenKey} - {str(frequencies[tokenKey])}" + "\n")
+    
