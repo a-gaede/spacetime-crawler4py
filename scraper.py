@@ -1,6 +1,6 @@
 import re
 import frontier
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 from bs4 import BeautifulSoup
 
 def scraper(url, resp):
@@ -52,15 +52,11 @@ def extract_next_links(url, resp):
             # Break down links into sections
             parsed_link = urlparse(links)
 
-            # Verify that links point to websites within our domain
-            is_valid_uci = checkValidUCIHost(parsed_link)
-            
-            if not is_valid_uci: # If it's not valid, move on
-                continue
-
             # Remove the fragment from end of link
             parsed_link = removeFragment(parsed_link)
-            temp_links.append(parsed_link)
+            # Add URL to list as a string
+            temp_links.append(urlunparse(parsed_link))
+
 
     # Check for traps
     
