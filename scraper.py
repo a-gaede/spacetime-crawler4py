@@ -1,5 +1,7 @@
 import re
-import frontier
+import urllib
+from urllib.robotparser import RobotFileParser
+from crawler import frontier, Frontier
 from urllib.parse import urlparse, urlunparse
 from bs4 import BeautifulSoup
 
@@ -39,7 +41,7 @@ def extract_next_links(url, resp):
 
 
     # Check for traps
-    for header, value in response.headers.items():
+    for header, value in resp.headers.items():
         if(header.lower() in ['x-robots-tag', 'x-content-type-options']):
             return url_list
     
