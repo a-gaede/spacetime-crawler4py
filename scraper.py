@@ -1,6 +1,7 @@
 import re
 from stopWords import STOPWORDS
 from urllib.parse import urlparse, urlunparse
+from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 
 UNIQUES = set()
@@ -41,13 +42,16 @@ def extract_next_links(url, resp):
     raw_text = resp.raw_response.text
     parsed_text = BeautifulSoup(raw_text,'html.parser')
     
-    # Check if low value page???
+    # Check if low value page
+    if checkLowInformation(parsed_text):
+        return url_list
     
     # Add html text to file
     writeHTMLData(parsed_text)
     # Check if it is the new longest page
-    if len(parsed_text.get_text()) > LONGEST[0]:
-        LONGEST = (len(parsed_text.get_text()), url)
+    wordCount = len(parsed_text.get_text().split())
+    if wordCount > LONGEST[0]:
+        LONGEST = (wordCount, url)
     
     # Extract links from text
     for item in parsed_text.find_all('a'):
@@ -106,7 +110,7 @@ def is_valid(url):
         if re.match(r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
-            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
+            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|ppsx"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
@@ -116,7 +120,7 @@ def is_valid(url):
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
-            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
+            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|ppsx"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
@@ -210,4 +214,11 @@ def writeFiftyCommonWordsReport():
     with open("reports/commonWordsReport.txt", "w") as commonWords:
         for tokenKey in sorted(frequencies, key=lambda x: frequencies[x], reverse=True)[:50]:
             commonWords.write(f"{tokenKey} - {str(frequencies[tokenKey])}" + "\n")
-    
+
+def checkLowInformation(parsed_text):
+    THRESHOLD = 300
+    wordCount = len(parsed_text.get_text().split())
+    if wordCount < THRESHOLD:
+        return True
+    else:
+        return False
