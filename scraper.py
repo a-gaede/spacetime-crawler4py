@@ -76,11 +76,6 @@ def extract_next_links(url, resp):
             parsed_link = removeFragment(parsed_link)
             # Add URL to list as a string
             temp_links.append(urlunparse(parsed_link))
-
-
-    # Check for traps
-    
-    # Check for duplicates
     
     # If link passes all tests, add it to the url_list
     for item in temp_links:
@@ -99,12 +94,16 @@ def extract_next_links(url, resp):
 
 def checkRobotTxt(url, user_agent = 'UW24 Bot'):
     robot_parser = urllib.robotparser.RobotFileParser()
+
     # Check domain for robots.txt
     parsed_url = urlparse(url)
+
     # Stripped of path, query and fragments
     stripped_url = urlunparse((parsed_url.scheme, parsed_url.netloc, '', '', '', ''))
+
     # Append /robots.txt and set the url to robot parser
     robot_parser.set_url(stripped_url + '/robots.txt')
+
     # Reads the robots.txt URL and feeds it to the parser.
     robot_parser.read()
 
