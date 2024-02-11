@@ -64,8 +64,8 @@ def extract_next_links(url, resp):
 
     # Check for traps
     
-
     # Check for duplicates
+    
     # If link passes all tests, add it to the url_list
     for item in temp_links:
             Frontier.add_url(item)
@@ -88,10 +88,17 @@ def removeFragment(parsedUrl: urlparse) -> urlparse:
 
 
 def checkValidUCIHost(parsedUrl: urlparse) -> bool:
+    # Check if URL has a hostname
+    if not parsedUrl.hostname:
+        return False
+    
     VALIDS = ["stat", "informatics", "cs", "ics"]
     
     # Splits URL by "."
     urlParts = parsedUrl.hostname.split(".")
+    # Check if URL has at least 4 parameters ("www", domain name, "uci", "edu")
+    if len(urlParts) != 4:
+        return False
     # Grab important parts of URL
     urlDomain = urlParts[1]
     urlSchool = urlParts[2]
