@@ -28,9 +28,25 @@ def extract_next_links(url, resp):
         # Placeholder for error checking
         print(resp.status)
         return url_list
+
+    # Check for permanent redirection
+    # If valid get new location from redirection
+    if(resp.status == 301):
+        resp = resp.url
+
+    # Check for traps
+    for header, value in response.headers.items():
+        if(header.lower() in ['x-robots-tag', 'x-content-type-options']):
+            return url_list
+    
     
     # Convert text to usable format
     raw_text = resp.raw_response.text
+    
+    # Check for capcha
+    if 'CAPCHA' in raw_text or 'capcha' in raw_text:
+        return url_list
+
     parsed_text = BeautifulSoup(raw_text,'html.parser')
 
     # Check unique pages
@@ -51,20 +67,14 @@ def extract_next_links(url, resp):
         # using updated is_valid function
         if is_valid(links):
             # Remove the fragment from end of link
-            link._replace(fragment='')
+            removeFragment(links)
+
 
             temp_links.append(link)
-    # Break down links into sections
 
 
     # Verify that links point to websites within our domain
     # using updated is_valid function
-
-    # Remove the fragment from end of link
-
-
-
-    # Check for traps
     
 
     # Check for duplicates
@@ -82,6 +92,7 @@ def extract_next_links(url, resp):
     *.informatics.uci.edu/*
     *.stat.uci.edu/*
 '''
+
 
 def removeFragment(parsedUrl: urlparse) -> urlparse:
     newURL = parsedUrl._replace(fragment='')
