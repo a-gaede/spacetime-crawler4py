@@ -51,17 +51,14 @@ def extract_next_links(url, resp):
     
     # Extract links from text
     for item in parsed_text.find_all('a'):
-        link = item.get('href') # Returns a list of links
-        if is_valid(link):
-            
-            # Break down links into sections
-            parsed_link = urlparse(link)
-
-            # Remove the fragment from end of link
-            parsed_link = removeFragment(parsed_link)
-        
+        link = item.get('href') # Get link
+        # Turn link to url object
+        parsed_link = urlparse(link)
+        # Remove fragment
+        parsed_link = removeFragment(parsed_link)
+        # Check valid link
+        if is_valid(urlunparse(parsed_link)):
             # Add link
-            # Issue - same links appear but difference in scheme http vs https
             UNIQUES.add(urlunparse(parsed_link))
             url_list.append(urlunparse(parsed_link))
 
@@ -106,7 +103,16 @@ def is_valid(url):
             return False
         if not checkValidUCIHost(parsed):
             return False
-        return not re.match(
+        if re.match(r".*\.(css|js|bmp|gif|jpe?g|ico"
+            + r"|png|tiff?|mid|mp2|mp3|mp4"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
+            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
+            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
+            + r"|epub|dll|cnf|tgz|sha1"
+            + r"|thmx|mso|arff|rtf|jar|csv"
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.query.lower()):
+            return False
+        return not re.match(    
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
@@ -186,6 +192,9 @@ def computeWordFrequencies(tokens: list[str]) -> dict[str, int]:
         # If token is a stop word skip
         if checkStopWord(token):
             continue
+        # 
+        if len(token) <= 3:
+            continue 
         # If seen increment token count
         if token in frequencies:
             frequencies[token] += 1
