@@ -11,7 +11,19 @@ def top_fifty_words(words):
     #returns top 50 words in words in list of tuple (word, frequency)
     sorted_words = sorted(words.items(), key=lambda x: x[1], reverse=True)
     return sorted_words[:50]
-    
+
+
+def count_words(text):
+    #takes string, splits it so its only alpha-numeric, then puts in word dict (word_counts) or increments
+    word_counts = {}
+    tokens = re.findall(r'\b\w+\b', text)
+    for token in tokens:
+        if token.upper() not in word_counts:
+            words[token.upper()] = 1
+        else
+            words[token.upper()] += 1
+    return word_counts
+        
 
 def extract_next_links(url, resp):
     # Implementation required.
