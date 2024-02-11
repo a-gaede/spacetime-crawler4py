@@ -69,23 +69,12 @@ def extract_next_links(url, resp):
             parsed_link = urlparse(links)
 
             # Remove the fragment from end of link
-<<<<<<< HEAD
-            removeFragment(links)
-
-
-            temp_links.append(link)
-
-
-    # Verify that links point to websites within our domain
-    # using updated is_valid function
-=======
             parsed_link = removeFragment(parsed_link)
             # Add URL to list as a string
             temp_links.append(urlunparse(parsed_link))
 
 
     # Check for traps
->>>>>>> ab89acec553b04eb66002dddc304b745f8306643
     
     # Check for duplicates
     
