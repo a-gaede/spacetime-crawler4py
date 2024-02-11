@@ -13,15 +13,16 @@ def top_fifty_words(words):
     return sorted_words[:50]
 
 
-def count_words(text):
+def count_words(text, stop_words):
     #takes string, splits it so its only alpha-numeric, then puts in word dict (word_counts) or increments
     word_counts = {}
     tokens = re.findall(r'\b\w+\b', text)
     for token in tokens:
-        if token.upper() not in word_counts:
-            word_counts[token.upper()] = 1
-        else:
-            word_counts[token.upper()] += 1
+        if token not in stop_words:
+            if token.upper() not in word_counts:
+                word_counts[token.upper()] = 1
+            else:
+                word_counts[token.upper()] += 1
     return word_counts
         
 
