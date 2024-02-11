@@ -6,6 +6,12 @@ from bs4 import BeautifulSoup
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
+    
+def top_fifty_words(words):
+    #returns top 50 words in words in list of tuple (word, frequency)
+    sorted_words = sorted(words.items(), key=lambda x: x[1], reverse=True)
+    return sorted_words[:50]
+    
 
 def extract_next_links(url, resp):
     # Implementation required.
