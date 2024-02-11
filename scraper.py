@@ -62,11 +62,20 @@ def extract_next_links(url, resp):
     temp_links = list() # Holds unchecked links
 
     for item in parsed_text.find_all('a'):
-        link = item.get('href') # Returns a list of links
-        # Verify that links point to websites within our domain
-        # using updated is_valid function
+        links = item.get('href') # Returns a list of links
         if is_valid(links):
+            
+            # Break down links into sections
+            parsed_link = urlparse(links)
+
+            # Verify that links point to websites within our domain
+            is_valid_uci = checkValidUCIHost(parsed_link)
+            
+            if not is_valid_uci: # If it's not valid, move on
+                continue
+
             # Remove the fragment from end of link
+<<<<<<< HEAD
             removeFragment(links)
 
 
@@ -75,9 +84,15 @@ def extract_next_links(url, resp):
 
     # Verify that links point to websites within our domain
     # using updated is_valid function
-    
+=======
+            parsed_link = removeFragment(parsed_link)
+            temp_links.append(parsed_link)
 
+    # Check for traps
+>>>>>>> ab89acec553b04eb66002dddc304b745f8306643
+    
     # Check for duplicates
+    
     # If link passes all tests, add it to the url_list
     for item in temp_links:
             Frontier.add_url(item)
@@ -101,10 +116,17 @@ def removeFragment(parsedUrl: urlparse) -> urlparse:
 
 
 def checkValidUCIHost(parsedUrl: urlparse) -> bool:
+    # Check if URL has a hostname
+    if not parsedUrl.hostname:
+        return False
+    
     VALIDS = ["stat", "informatics", "cs", "ics"]
     
     # Splits URL by "."
     urlParts = parsedUrl.hostname.split(".")
+    # Check if URL has at least 4 parameters ("www", domain name, "uci", "edu")
+    if len(urlParts) != 4:
+        return False
     # Grab important parts of URL
     urlDomain = urlParts[1]
     urlSchool = urlParts[2]
