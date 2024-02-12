@@ -1,7 +1,6 @@
 import re
 from stopWords import STOPWORDS
 from urllib.parse import urlparse, urlunparse
-from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 
 UNIQUES = set()
