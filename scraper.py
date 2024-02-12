@@ -34,6 +34,11 @@ def extract_next_links(url, resp):
         
     # Convert text to usable format
     raw_text = resp.raw_response.text
+    
+    # Check for capcha
+    if 'CAPCHA' in raw_text or 'capcha' in raw_text:
+        return url_list
+
     parsed_text = BeautifulSoup(raw_text,'html.parser')
     
     # Check large file
