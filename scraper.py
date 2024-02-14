@@ -7,8 +7,9 @@ UNIQUES = set()
 LONGEST = (0, "")
 
 def scraper(url, resp):
+    global UNIQUES
     links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+    return [link for link in links if is_valid(link, UNIQUES)]
 
 def extract_next_links(url, resp):
     global UNIQUES, LONGEST
@@ -55,11 +56,11 @@ def extract_next_links(url, resp):
     for item in parsed_text.find_all('a'):
         link = item.get('href') # Get link
         # Turn link to url object
-        parsed_link = urlparse(link)
+        parsed_link = urlparse(link.strip())
         # Remove fragment
         parsed_link = removeFragment(parsed_link)
         # Check valid link
-        if is_valid(urlunparse(parsed_link)):
+        if is_valid(urlunparse(parsed_link), UNIQUES):
             # Add link
             UNIQUES.add(urlunparse(parsed_link))
             url_list.append(urlunparse(parsed_link))
@@ -74,13 +75,13 @@ def removeFragment(parsedUrl: urlparse) -> urlparse:
 
 def checkValidUCIHost(parsedUrl: urlparse) -> bool:
     # Check if URL has a hostname
-    if not parsedUrl.hostname:
+    if not parsedUrl.netloc:
         return False
     
     VALIDS = ["stat", "informatics", "cs", "ics"]
     
     # Splits URL by "."
-    urlParts = parsedUrl.hostname.split(".")
+    urlParts = parsedUrl.netloc.split(".")
     # Check if URL has at least 4 parameters ("www", domain name, "uci", "edu")
     if len(urlParts) != 4:
         return False
@@ -95,16 +96,27 @@ def checkValidUCIHost(parsedUrl: urlparse) -> bool:
     return False
         
 
-def is_valid(url):
+def is_valid(url, uniques):
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
+        url = url.strip()
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
         if not checkValidUCIHost(parsed):
             return False
+        # Check dupliates but different schemes
+        if parsed.scheme == 'http':
+            newParsedUrl = 'https://' + parsed.netloc + parsed.path
+            if newParsedUrl in uniques:
+                return False
+        else:
+            newParsedUrl = 'http://' + parsed.netloc + parsed.path
+            if newParsedUrl in uniques:
+                return False
+        # Check if query ends in file type
         if re.match(r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|txt"
@@ -114,6 +126,17 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.query.lower()):
             return False
+        # Check if path contains directory of file
+        if re.search(r"\/(css|js|bmp|gif|jpe?g|ico"
+            + r"|png|tiff?|mid|mp2|mp3|mp4"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|txt"
+            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|ppsx"
+            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
+            + r"|epub|dll|cnf|tgz|sha1"
+            + r"|thmx|mso|arff|rtf|jar|csv"
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)\/", parsed.path.lower()):
+            return False
+        # Check if path ends in file type
         return not re.match(    
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
