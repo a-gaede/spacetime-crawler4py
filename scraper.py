@@ -56,7 +56,7 @@ def extract_next_links(url, resp):
     for item in parsed_text.find_all('a'):
         link = item.get('href') # Get link
         # Turn link to url object
-        parsed_link = urlparse(link.strip())
+        parsed_link = urlparse(link)
         # Remove fragment
         parsed_link = removeFragment(parsed_link)
         # Check valid link
@@ -124,7 +124,7 @@ def is_valid(url, uniques):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.query.lower()):
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz|odc)$", parsed.query.lower()):
             return False
         # Check if path contains directory of file
         if re.search(r"\/(css|js|bmp|gif|jpe?g|ico"
@@ -134,7 +134,7 @@ def is_valid(url, uniques):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)\/", parsed.path.lower()):
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz|odc)\/", parsed.path.lower()):
             return False
         # Check if path ends in file type
         return not re.match(    
@@ -145,7 +145,7 @@ def is_valid(url, uniques):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz|odc)$", parsed.path.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
