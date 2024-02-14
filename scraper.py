@@ -1,17 +1,19 @@
 import re
 from stopWords import STOPWORDS
+from requests import Response
 from urllib.parse import urlparse, urlunparse
 from bs4 import BeautifulSoup
 
+# Hold unique links and longest page
 UNIQUES = set()
 LONGEST = (0, "")
 
-def scraper(url, resp):
+def scraper(url: str, resp: Response) -> list[str]:
     global UNIQUES
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link, UNIQUES)]
 
-def extract_next_links(url, resp):
+def extract_next_links(url: str, resp: Response) -> list[str]:
     global UNIQUES, LONGEST
     url_list = list()
 
@@ -96,7 +98,7 @@ def checkValidUCIHost(parsedUrl: urlparse) -> bool:
     return False
         
 
-def is_valid(url, uniques):
+def is_valid(url: str, uniques: set[str]) -> bool:
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
@@ -151,29 +153,29 @@ def is_valid(url, uniques):
         print ("TypeError for ", parsed)
         raise
 
-def getUniques():
+def getUniques() -> None:
     return UNIQUES
 
-def writeUniquesReport():
+def writeUniquesReport() -> None:
     # Create a file in "reports/uniquesReport.txt" with number of unique links and the links
     with open('reports/uniquesReport.txt', 'w') as uniquesReport:
         uniquesReport.write("Number of unique pages: " + str(len(UNIQUES)) + "\n")
         for i in getUniques():
             uniquesReport.write(i+"\n")
             
-def writeLongestReport():
+def writeLongestReport() -> None:
     # Create a file in "reports/longestReport.txt" with link with most text and number of words
     with open('reports/longestReport.txt', 'w') as longestReport:
         words = LONGEST[0]
         URL = LONGEST[1]
         longestReport.write(f'{URL} - {words}')
 
-def clearHTMLData():
+def clearHTMLData() -> None:
     # Make file empty
     with open('reports/HTMLReport.txt', 'w'):
         pass
             
-def writeHTMLData(htmlData):
+def writeHTMLData(htmlData: BeautifulSoup) -> None:
     # Add HTML text to file
     with open('reports/HTMLReport.txt', 'a', encoding="utf-8") as HTMLReport:
         HTMLReport.write(htmlData.get_text())
@@ -206,7 +208,7 @@ def tokenize(TextFilePath: str) -> list[str]:
 
         return tokens
 
-def checkStopWord(token):
+def checkStopWord(token: str) -> bool:
     if token in STOPWORDS:
         return True
     return False
@@ -229,14 +231,14 @@ def computeWordFrequencies(tokens: list[str]) -> dict[str, int]:
 
     return frequencies
 
-def writeFiftyCommonWordsReport():
+def writeFiftyCommonWordsReport() -> None:
     tokens = tokenize("reports/HTMLReport.txt")
     frequencies = computeWordFrequencies(tokens)
     with open("reports/commonWordsReport.txt", "w") as commonWords:
         for tokenKey in sorted(frequencies, key=lambda x: frequencies[x], reverse=True)[:50]:
             commonWords.write(f"{tokenKey} - {str(frequencies[tokenKey])}" + "\n")
 
-def checkLowInformation(parsed_text):
+def checkLowInformation(parsed_text: str) -> bool:
     THRESHOLD = 300
     wordCount = len(parsed_text.get_text().split())
     if wordCount < THRESHOLD:
