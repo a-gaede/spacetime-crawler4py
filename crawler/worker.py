@@ -24,13 +24,13 @@ class Worker(Thread):
         parsed = urlparse(url)
         try:
             # Create URL string in form https://subdomain.domainname.uci.edu
-            URL = f'{parsed.scheme}://{parsed.hostname}'
+            URL = f'{parsed.scheme}://{parsed.netloc}'
             # If subdomain for URL exists in dictionary, append it to the list of links with the same subdomain
             if URL in self.subdomains:
-                self.subdomains[URL].append(urlunparse(parsed))
+                self.subdomains[URL].append(urlunparse(parsed).lower().strip())
             # Subdomain not in dicitonary, add it with the link in a list as the value
             else:
-                self.subdomains[URL] = [urlunparse(parsed)]
+                self.subdomains[URL] = [urlunparse(parsed).lower().strip()]
         except:
             pass
     
