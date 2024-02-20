@@ -1,6 +1,5 @@
 import re
 from stopWords import STOPWORDS
-from requests import Response
 from urllib.parse import urlparse, urlunparse
 from bs4 import BeautifulSoup
 
@@ -8,12 +7,12 @@ from bs4 import BeautifulSoup
 UNIQUES = set()
 LONGEST = (0, "")
 
-def scraper(url: str, resp: Response) -> list[str]:
+def scraper(url: str, resp) -> list[str]:
     global UNIQUES
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link, UNIQUES)]
 
-def extract_next_links(url: str, resp: Response) -> list[str]:
+def extract_next_links(url: str, resp) -> list[str]:
     global UNIQUES, LONGEST
     url_list = list()
 
